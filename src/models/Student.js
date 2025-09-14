@@ -1,13 +1,14 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../db");
+const User = require("./User");
 
-const StudentSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    age: { type: Number, required: true },
-    grade: { type: String, required: true },
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
-  },
-  { timestamps: true }
-);
+const Student = sequelize.define("Student", {
+  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  name: { type: DataTypes.STRING, allowNull: false },
+  grade: { type: DataTypes.STRING, allowNull: false },
+});
 
-module.exports = mongoose.model("Student", StudentSchema);
+Student.belongsTo(User, { as: "parent", foreignKey: "parentId" });
+User.hasMany(Student, { as: "children", foreignKey: "parentId" });
+
+module.exports = Student;
