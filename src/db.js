@@ -1,9 +1,9 @@
 // src/db.js
-const { Pool } = require("pg");
-const { MongoClient } = require("mongodb");
-const { Sequelize } = require("sequelize");
+import { Pool } from "pg";
+import { MongoClient } from "mongodb";
+import { Sequelize } from "sequelize";
 
-const pgPool = new Pool({
+export const pgPool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
@@ -11,7 +11,7 @@ const pgPool = new Pool({
 let mongoClient;
 let mongoDb;
 
-async function connectMongo() {
+export async function connectMongo() {
   if (mongoDb) return mongoDb;
   mongoClient = new MongoClient(process.env.MONGO_URI);
   await mongoClient.connect();
@@ -20,15 +20,13 @@ async function connectMongo() {
   return mongoDb;
 }
 
-function getMongo() {
+export function getMongo() {
   if (!mongoDb) throw new Error("Mongo not connected. Call connectMongo()");
   return mongoDb;
 }
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+export const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
-  ssl: { rejectUnauthorized: false },
+  dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
   logging: false,
 });
-
-module.exports = { pgPool, connectMongo, getMongo, sequelize };
