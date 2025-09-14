@@ -14,7 +14,8 @@
     "mongoose": "^7.6.1",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "winston": "^3.13.0"
+    "winston": "^3.13.0",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
