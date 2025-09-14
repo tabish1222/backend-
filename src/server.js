@@ -1,42 +1,26 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const { Pool } = require("pg");
-const logger = require("./utils/logger");
-require("dotenv").config();
+const cors = require("cors");
+const sequelize = require("./config/postgres");
+const connectMongo = require("./config/mongo");
+
+const authRoutes = require("./routes/auth.routes");
+const studentRoutes = require("./routes/student.routes");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
+
+app.use("/auth", authRoutes);
+app.use("/students", studentRoutes);
 
 const PORT = process.env.PORT || 10000;
 
-// PostgreSQL Connection
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_URI,
-  ssl: { rejectUnauthorized: false }
-});
-
-pool.connect()
-  .then(() => logger.info("✅ Connected to PostgreSQL"))
-  .catch(err => {
-    logger.error("❌ PostgreSQL connection error: " + err.message);
-    process.exit(1);
-  });
-
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => logger.info("✅ Connected to MongoDB"))
-  .catch(err => {
-    logger.error("❌ MongoDB connection error: " + err.message);
-    process.exit(1);
-  });
-
-// Test route
-app.get("/", (req, res) => {
-  logger.info("Root route accessed");
-  res.send("🎉 Backend is running successfully!");
-});
-
-// Start server
-app.listen(PORT, () => {
-  logger.info(`🚀 Server running on port ${PORT}`);
-});
+(async () => {
+  try {
+    await connectMongo();
+    await sequelize.sync();
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  } catch (err) {
+    console.error("❌ Startup error:", err.message);
+  }
+})();
