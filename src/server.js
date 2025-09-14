@@ -7,6 +7,8 @@ const morgan = require("morgan");
 const authRoutes = require("./routes/auth.routes");
 const studentRoutes = require("./routes/student.routes");
 
+const { sequelize } = require("./db"); // ✅ import Sequelize instance
+
 const app = express();
 
 // Middleware
@@ -23,20 +25,33 @@ app.get("/", (req, res) => {
   res.send("✅ School backend is running");
 });
 
-// Connect MongoDB
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => {
+// --- Initialize both MongoDB and Sequelize ---
+async function startServer() {
+  try {
+    // MongoDB
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log("✅ Connected to MongoDB");
-    const PORT = process.env.PORT || 10000; // 👈 default to 10000
+
+    // Sequelize
+    await sequelize.authenticate();
+    console.log("✅ Connected to PostgreSQL via Sequelize");
+
+    // Sync models
+    await sequelize.sync({ alter: true }); // creates tables if they don't exist
+    console.log("✅ Sequelize models synced");
+
+    // Start server
+    const PORT = process.env.PORT || 10000;
     app.listen(PORT, "0.0.0.0", () =>
       console.log(`🚀 Server running on port ${PORT}`)
     );
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
+  } catch (err) {
+    console.error("❌ DB connection error:", err);
     process.exit(1);
-  });
+  }
+}
+
+startServer();
