@@ -5,7 +5,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 import authRoutes from "./routes/auth.routes.js";
-import studentRoutes from "./routes/student.routes.js";
+import studentsRouter from "./routes/students.js";   // ⬅️ replaced student.routes.js
 import { sequelize, connectMongo } from "./db.js";
 
 const app = express();
@@ -17,7 +17,7 @@ app.use(morgan("dev"));
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/students", studentRoutes);
+app.use("/api/students", studentsRouter);  // ⬅️ new students.js route
 
 // Health check
 app.get("/", (req, res) => {
